@@ -1,6 +1,5 @@
 import {parse} from "node:path";
 import sharp from "sharp";
-import {getNewFilePath} from "./utils.js";
 
 export const cropImage = async (image, width, height) => {
   return await sharp(image)
@@ -11,7 +10,6 @@ export const cropImage = async (image, width, height) => {
     .toBuffer();
 };
 
-// get content type using file name
 export const getContentType = (fileName) => {
   const {ext} = parse(fileName);
 
