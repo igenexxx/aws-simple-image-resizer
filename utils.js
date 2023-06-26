@@ -1,4 +1,4 @@
-import { parse } from 'node:fs';
+import { parse } from 'node:path';
 import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import { config } from "./config.js";
