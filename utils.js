@@ -2,7 +2,6 @@ import { parse } from 'node:fs';
 import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import { config } from "./config.js";
-import { tmpdir } from "node:os";
 import {getContentType} from "./image-utils.js";
 
 const s3 = new S3Client({ region: config.s3.region });
@@ -20,7 +19,6 @@ export const getObject = async (bucket, key) => {
   }
 };
 
-// upload file to s3
 const createOrPutImageObjectOriginal = async (bucket, key, body) => {
   const params = {
     Bucket: bucket.concat('-resized'),
