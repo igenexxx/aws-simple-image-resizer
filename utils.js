@@ -5,21 +5,24 @@ import { config } from "./config.js";
 import {getContentType} from "./image-utils.js";
 
 const s3 = new S3Client({ region: config.s3.region });
-export const getObject = async (bucket, key) => {
+export const getObject = bucket => async (key) => {
   const params = {
     Bucket: bucket,
     Key: key,
   };
 
+  console.log("params", params);
+
   try {
     const { Body } = await s3.send(new GetObjectCommand(params));
-    return Body;
+
+    return Buffer.concat(await Body.toArray())
   } catch (err) {
-    console.log("Error", err);
+    console.log("Get file error", err);
   }
 };
 
-const createOrPutImageObjectOriginal = async (bucket, key, body) => {
+export const createOrPutImageObject = (bucket, key) => async (body) => {
   const params = {
     Bucket: bucket.concat('-resized'),
     Key: key,
@@ -27,10 +30,12 @@ const createOrPutImageObjectOriginal = async (bucket, key, body) => {
     ContentType: getContentType(key),
   };
 
+  console.log("params", params);
+
   try {
     await s3.send(new PutObjectCommand(params));
   } catch (err) {
-    console.log("Error", err);
+    console.log("Put file error", err);
   }
 }
 
@@ -40,17 +45,4 @@ export const getNewFilePath = (filePath) => {
   return `${dir}/${uuidv4()}-${name}${ext}`;
 };
 
-export const partialRight = (fn,...presetArgs) => (...laterArgs) => fn( ...laterArgs, ...presetArgs );
-
-export const partial = (fn) => {
-  const curryize = (...startParams) => (...remainedParams) => {
-    const allParams = [...startParams, ...remainedParams];
-    return allParams.length < fn.length ? curryize(...allParams) : fn(...allParams);
-  };
-
-  return curryize();
-};
-
 export const asyncPipe = (...fns) => (x) => fns.reduce(async (y, f) => f(await y), x);
-
-export const createOrPutImageObject = partial(createOrPutImageObjectOriginal);

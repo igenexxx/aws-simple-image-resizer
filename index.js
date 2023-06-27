@@ -1,12 +1,24 @@
-import {asyncPipe, createOrPutImageObject, getNewFilePath, getObject, partialRight} from "./utils.js";
+import {
+  asyncPipe,
+  createOrPutImageObject,
+  getNewFilePath,
+  getObject,
+} from "./utils.js";
 import {cropImage} from "./image-utils.js";
 
 export const handler = async (event) => {
-  const { bucket, key } = event.Records[0].s3.object;
+  const [{ s3: { bucket: { name: bucketName }, object: { key } } }] = event.Records;
 
-  return await asyncPipe(
-    getObject,
-    partialRight(cropImage, 200, 200),
-    createOrPutImageObject(bucket, getNewFilePath(key)),
-  ).catch(console.error);
+  console.log("bucket", bucketName);
+  console.log("key", key);
+
+  try {
+    return await asyncPipe(
+      getObject(bucketName),
+      cropImage(200, 200),
+      createOrPutImageObject(bucketName, getNewFilePath(key)),
+    )(key);
+  } catch (err) {
+    console.error("Error", err);
+  }
 }
